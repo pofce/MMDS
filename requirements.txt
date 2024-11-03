@@ -1,0 +1,3 @@
+pyspark==3.5.1
+pywikibot==9.5.0
+sseclient==0.0.27
