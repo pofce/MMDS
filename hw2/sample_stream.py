@@ -62,3 +62,5 @@ query = (expanded_df
          .foreachBatch(process_batch)
          .option("checkpointLocation", "checkpoint")
          .start())
+
+query.awaitTermination()

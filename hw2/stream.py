@@ -57,5 +57,3 @@ def main():
 if __name__ == "__main__":
     sys.argv = [sys.argv[0], '20241025']
     main()
-
-#%%
