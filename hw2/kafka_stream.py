@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime
 from kafka import KafkaProducer
 from pywikibot.comms.eventstreams import EventStreams
@@ -33,7 +34,7 @@ def extract_record(change):
 
 def main():
     producer = KafkaProducer(
-        bootstrap_servers="localhost:9092",
+        bootstrap_servers=os.getenv("BOOTSTRAP_SERVERS", "localhost:9093"),
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
     )
     stream_date = "20241025"

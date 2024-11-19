@@ -126,7 +126,7 @@ def process_batch(batch_df, epoch_id):
 # read streaming data
 raw_df = (
     spark.readStream.format("kafka")
-    .option("kafka.bootstrap.servers", "localhost:9092")
+    .option("kafka.bootstrap.servers", os.getenv("KAFKA_SERVER", "localhost:9093"))  # Use 'kafka' for Docker communication
     .option("subscribe", "wikipedia-edits")
     .option("startingOffsets", "earliest")
     .load()

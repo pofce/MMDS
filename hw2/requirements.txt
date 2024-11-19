@@ -2,3 +2,7 @@ pyspark==3.5.1
 pywikibot==9.5.0
 sseclient==0.0.27
 kafka_python==2.0.2
+numpy==1.26.2
+pandas==2.2.0
+bitarray==3.0.0
+mmh3==4.1.0

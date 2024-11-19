@@ -166,3 +166,4 @@ cython_debug/
 /.idea/
 _SUCCESS
 *.crc
+/hw2/kafka-logs/
