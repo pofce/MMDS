@@ -114,7 +114,7 @@ def process_batch(batch_df, epoch_id):
     bots_df = predictions.filter(col("prediction") >= 0.5)
 
     # add bot user to the bloom filter
-    new_bot_identifiers = [row.id for row in bots_df.select("user").collect()]
+    new_bot_identifiers = [row.user for row in bots_df.select("user").collect()]
     for bot_identifier in new_bot_identifiers:
         bloom_filter.add(bot_identifier)
 
@@ -126,8 +126,9 @@ def process_batch(batch_df, epoch_id):
 # read streaming data
 raw_df = (
     spark.readStream.format("kafka")
-    .option("kafka.bootstrap.servers", os.getenv("KAFKA_SERVER", "localhost:9093"))  # Use 'kafka' for Docker communication
+    .option("kafka.bootstrap.servers", os.getenv("KAFKA_SERVER", "localhost:9092"))  # Use 'kafka' for Docker communication
     .option("subscribe", "wikipedia-edits")
+    .option("failOnDataLoss", "false")
     .option("startingOffsets", "earliest")
     .load()
 )
