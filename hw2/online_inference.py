@@ -3,6 +3,7 @@ from pyspark.sql.functions import col, from_json, explode
 from pyspark.sql.types import StructType, StructField, StringType, LongType, IntegerType, BooleanType, ArrayType
 from pyspark.ml import PipelineModel
 import pickle
+from BloomFilter import BloomFilter
 import os
 
 
@@ -86,7 +87,7 @@ def process_batch(batch_df, epoch_id):
 
     # Print status
     print(
-        f"Epoch {epoch_id}: Processed batch with {len(bot_ids)} bot records. Total bloom filter size: {len(bloom_filter)}")
+        f"Epoch {epoch_id}: Processed batch with {len(bot_ids)} bot records. Total bloom filter size: {bloom_filter.size}")
 
 
 # 7. Start the Streaming Query
