@@ -5,6 +5,13 @@ from pyspark.sql.types import ArrayType, StructType, StructField, StringType, In
 
 spark = SparkSession.builder.appName("WikipediaBotFilter").getOrCreate()
 
+raw_df = (spark
+          .readStream
+          .format("socket")
+          .option("host", "localhost")
+          .option("port", 5050)
+          .load())
+
 schema = ArrayType(StructType([
     StructField("id", LongType(), True),
     StructField("title", StringType(), True),
@@ -16,13 +23,6 @@ schema = ArrayType(StructType([
     StructField("minor", BooleanType(), True),
     StructField("comment", StringType(), True),
 ]))
-
-raw_df = (spark
-          .readStream
-          .format("socket")
-          .option("host", "localhost")
-          .option("port", 5050)
-          .load())
 
 # Parse the list of JSON objects and then explode it into individual records
 json_df = raw_df.select(from_json(col("value"), schema).alias("data"))

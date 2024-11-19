@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, from_json, explode, udf, length, when
+from pyspark.sql.functions import col, from_json, udf, length, when
 from pyspark.sql.types import (
     StructType,
     StructField,
@@ -11,7 +11,7 @@ from pyspark.sql.types import (
 )
 from pyspark.ml import PipelineModel
 import pickle
-from BloomFilter import BloomFilter
+from bloom_filter import BloomFilter
 import os
 
 
@@ -42,20 +42,17 @@ schema = ArrayType(
 
 
 # load pre-trained model
-model_save_path = os.getenv(
-    "MODEL_PATH", "/Users/dmytro.miedviediev/Projects/MMDS/hw2/model/"
-)
-model = PipelineModel.load(model_save_path)
+model = PipelineModel.load("model/")
 
 # load bloom filter
-bloom_filter_path = "bloom_filter.pkl"
+bloom_filter_path = "bloom_filter.pickle"
 
 
 if os.path.exists(bloom_filter_path):
     with open(bloom_filter_path, "rb") as f:
         state = pickle.load(f)
     bloom_filter = BloomFilter.from_state(state)
-    print(f"Loaded existing Bloom filter with {len(bloom_filter)} entries.")
+    print(f"Loaded existing Bloom filter with {bloom_filter.size} entries.")
 else:
     # init new bloom filter with expected items and false positive rate
     expected_items = 1000000
@@ -141,7 +138,7 @@ expanded_df = json_df.selectExpr("explode(data) as record").select("record.*")
 
 # start streaming
 query = (
-    expanded_df.filter("id % 100 < 20")
+    expanded_df
     .writeStream.foreachBatch(process_batch)
     .option("checkpointLocation", "checkpoint_bot_filter")
     .start()
