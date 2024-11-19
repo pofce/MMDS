@@ -162,6 +162,7 @@ cython_debug/
 #.idea/
 /hw2/throttle.ctrl
 /hw2/checkpoint/
+/hw2/checkpoint_bot_filter/
 /.idea/
 _SUCCESS
 *.crc
