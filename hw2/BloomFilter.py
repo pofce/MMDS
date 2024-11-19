@@ -3,6 +3,7 @@ from bitarray import bitarray
 import mmh3
 import math
 
+
 class BloomFilter:
     def __init__(self, expected_items, false_positive_rate):
         """
