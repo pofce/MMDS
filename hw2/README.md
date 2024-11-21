@@ -38,5 +38,5 @@ python hw2/online_inference
 ### Summary
 We implemented a scalable pipeline to filter out bots from Wikipedia Edits stream. 
 
-We used BloomFilter to filter out 90% of edits and our model to find bots and add them to the black list. 
+We used BloomFilter to filter out bots from edits and our model to find bots and add them to the black list. 
 As we can see, with each run our black list becomes larger, as well as our ability to detect bots.

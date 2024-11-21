@@ -53,11 +53,33 @@ class BloomFilter:
                 return False
         return True
 
+    def resize(self, additional_expected_items):
+        """
+        Resize the Bloom filter to accommodate additional expected items.
+        This method recalculates the size and number of hash functions, and resizes the bit array.
+        """
+
+        self.expected_items += additional_expected_items
+        new_size = self._calculate_size()
+        new_hash_count = self._calculate_hash_count()
+
+        if new_size > self.size:
+            # Extend the bit array with additional bits set to 0
+            additional_bits = new_size - self.size
+            self.bit_array.extend([0] * additional_bits)
+            self.size = new_size
+
+        # Update the number of hash functions if it has changed
+        if new_hash_count != self.hash_count:
+            self.hash_count = new_hash_count
+
     def get_state(self):
         """
         Serialize the Bloom filter's state for distribution or saving.
         """
         return {
+            "expected_items": self.expected_items,
+            "false_positive_rate": self.false_positive_rate,
             "size": self.size,
             "hash_count": self.hash_count,
             "bit_array": self.bit_array.tobytes(),
@@ -68,7 +90,10 @@ class BloomFilter:
         """
         Deserialize a Bloom filter from a serialized state.
         """
-        obj = cls(expected_items=1, false_positive_rate=0.1)  # Placeholder values
+        obj = cls(
+            expected_items=state["expected_items"],
+            false_positive_rate=state["false_positive_rate"],
+        )
         obj.size = state["size"]
         obj.hash_count = state["hash_count"]
         obj.bit_array = bitarray()

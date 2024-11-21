@@ -70,20 +70,15 @@ def process_batch(batch_df, epoch_id):
     bf_state_broadcast = spark.sparkContext.broadcast(bf_state)
 
     # define UDF to check if a record is already flagged as a bot
-    def is_seen():
-        bf_local = None
-
-        def inner(item_id):
-            nonlocal bf_local
-            if bf_local is None:
-                # reconstruct bloom filter
-                bf_state = bf_state_broadcast.value
-                bf_local = BloomFilter.from_state(bf_state)
+    def create_is_seen_udf():
+        def is_seen(item_id):
+            bf_state = bf_state_broadcast.value
+            bf_local = BloomFilter.from_state(bf_state)
             return bf_local.contains(str(item_id))
 
-        return inner
+        return udf(is_seen, BooleanType())
 
-    is_seen_udf = udf(is_seen(), BooleanType())
+    is_seen_udf = udf(create_is_seen_udf(), BooleanType())
 
     # filter out records using bloom filter
     unseen_df = batch_df.withColumn("is_seen", is_seen_udf(col("id"))).filter(
@@ -114,6 +109,11 @@ def process_batch(batch_df, epoch_id):
     new_bot_identifiers = [row.user for row in bots_df.select("user").collect()]
     for bot_identifier in new_bot_identifiers:
         bloom_filter.add(bot_identifier)
+
+    bloom_filter.resize(len(new_bot_identifiers))
+
+    with open(bloom_filter_path, "wb") as f:
+        pickle.dump(bloom_filter.get_state(), f)
 
     print(
         f"Epoch {epoch_id}: Processed {unseen_df.count()} unseen records, identified {len(new_bot_identifiers)} new bots."
