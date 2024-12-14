@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, from_json, explode
+from pyspark.sql.functions import col, from_json, explode, hash
 from pyspark.sql.types import ArrayType, StructType, StructField, StringType, IntegerType, BooleanType, LongType
 
 
@@ -45,7 +45,7 @@ def process_batch(df, epoch_id):
     if total_records >= 1000:
         number_of_files += 1
         # Write the accumulated records to CSV
-        accumulated_df.coalesce(1).write.mode('append').csv('sample_data')
+        accumulated_df.coalesce(1).write.mode('append').csv('hw2/sample_data/80k_sample')
 
         # Reset counters and accumulated DataFrame
         total_records = 0
@@ -57,10 +57,11 @@ def process_batch(df, epoch_id):
 
 # Start streaming and use foreachBatch to process data in batches
 query = (expanded_df
-         .filter("id % 100 < 20")
+         .withColumn("user_hash", hash(expanded_df["user"]))
+         .filter("user_hash % 100 < 20")
          .writeStream
          .foreachBatch(process_batch)
-         .option("checkpointLocation", "checkpoint")
+         .option("checkpointLocation", "hw2/sample_data/checkpoint")
          .start())
 
 query.awaitTermination()
